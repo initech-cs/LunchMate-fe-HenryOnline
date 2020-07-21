@@ -1,6 +1,6 @@
 import jwt from "jwt-decode";
 
-export default function authHeader() {
+export default function getData() {
   const token = JSON.parse(localStorage.getItem("token"));
   if (token) {
     const decoded = jwt(token);

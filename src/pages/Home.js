@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Jumbotron, Container, Form, Col, Button } from "react-bootstrap";
 import Flatpickr from "react-flatpickr";
+import verify from "../ultils/verify";
 import "flatpickr/dist/themes/airbnb.css";
 
 export default function Home() {
@@ -8,18 +9,25 @@ export default function Home() {
   const [address, setAddress] = useState("");
   const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [state, setState] = useState("AL");
   const [zipCode, setZip] = useState("");
   const encode = (x) => {
     return encodeURIComponent(x);
   };
-  const submitForm = (e) => {
+  const submitForm = async (e) => {
     e.preventDefault();
     let message = "";
     const formData = { date, address, address2, city, state, zipCode };
+    console.log(formData);
     if (!date || !address || !city || !state || !zipCode) {
       message += "Missing fields!";
       alert(message);
+      return;
+    }
+    let check = await verify(address, address2, city, state, zipCode);
+    if (check.length === 0) {
+      alert("Address is invalid!");
+      return;
     }
   };
   return (
@@ -37,7 +45,10 @@ export default function Home() {
             <Flatpickr
               data-enable-time
               value={date}
-              options={{ dateFormat: "l, F j, Y at h:i K" }}
+              options={{
+                dateFormat: "l, F j, Y at h:i K",
+                minDate: "today",
+              }}
               onChange={(date) => setDate(date)}
             />
           </Form.Group>
