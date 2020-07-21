@@ -1,44 +1,63 @@
 import React, { useState } from "react";
-import * as EmailValidator from "email-validator";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useDispatch } from "react-redux";
-import { useHistory, Link } from "react-router-dom";
+import * as EmailValidator from "email-validator";
+import TagsInput from "react-tagsinput";
 
 const API = process.env.REACT_APP_BACKEND;
 
-export default function Login() {
+export default function Update() {
   let history = useHistory();
-  let dispatch = useDispatch();
+  const token = useSelector((state) => state.token);
+  const [name, setName] = useState("");
+  const [age, setAge] = useState(0);
+  const [tags, setTags] = useState([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const sendForm = async (formData) => {
-    let url = API + "/auth/login";
-    const data = await fetch(url, {
-      method: "POST",
+    let url = API + "/users/update";
+    const newUser = await fetch(url, {
+      method: "PUT",
       headers: {
+        "x-access-token": token,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     });
-    if (data.ok) {
-      alert("User login successfully.");
-      let result = await data.json();
-      console.log(result.data);
-      localStorage.setItem("token", JSON.stringify(result.data.token));
-      dispatch({ type: "LOGIN", payload: result.data.token });
-      history.push("/profile");
+    if (newUser.ok) {
+      alert("Update account successfully!");
     } else {
       alert("Some errors happened. Please contact support.");
     }
+    history.push("/profile");
   };
   const submitForm = (e) => {
     let errors = {
+      name: "",
+      age: "",
+      tags: "",
       email: "",
       password: "",
     };
     let message = "";
     e.preventDefault();
     let check = false;
+    if (!name) {
+      errors["name"] = "Name is required.";
+      message += errors["name"] + "\r\n";
+      check = true;
+    }
+    if (age < 18 || age > 99) {
+      errors["age"] = "Age must be between 18 and 99.";
+      message += errors["age"] + "\r\n";
+      check = true;
+    }
+    if (tags.length === 0) {
+      errors["tags"] = "Interests are required.";
+      message += errors["tags"] + "\r\n";
+      check = true;
+    }
     if (!EmailValidator.validate(email)) {
       errors["email"] = "Email is invalid.";
       message += errors["email"] + "\r\n";
@@ -52,7 +71,7 @@ export default function Login() {
     if (check) {
       alert(message);
     } else {
-      const formData = { email, password };
+      const formData = { name, age, tags, email, password };
       sendForm(formData);
     }
   };
@@ -70,6 +89,31 @@ export default function Login() {
         <Row>
           <Col>
             <Form>
+              <Form.Group>
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={name}
+                  placeholder="John Doe"
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Age</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                ></Form.Control>
+              </Form.Group>
+              <Form.Group>
+                <label className="labelTagsInput">Interests</label>
+                <TagsInput value={tags} onChange={setTags} />
+              </Form.Group>
               <Form.Group controlId="formBasicEmail">
                 <Form.Label>Email address</Form.Label>
                 <Form.Control
@@ -92,17 +136,13 @@ export default function Login() {
                   required
                 />
               </Form.Group>
-              <Form.Group className="d-flex flex-row justify-content-space-between">
-                <Link to="/register">Create an account</Link>
-                <Button
-                  className="ml-auto"
-                  variant="primary"
-                  type="submit"
-                  onClick={(e) => submitForm(e)}
-                >
-                  Submit
-                </Button>
-              </Form.Group>
+              <Button
+                variant="primary"
+                type="submit"
+                onClick={(e) => submitForm(e)}
+              >
+                Submit
+              </Button>
             </Form>
           </Col>
         </Row>

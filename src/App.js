@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-import Logout from "./pages/Logout";
+import Update from "./pages/Update";
 import { Navbar, Nav } from "react-bootstrap";
 import "./ultils/getData";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -14,7 +14,7 @@ import "./App.css";
 
 function App() {
   let dispatch = useDispatch();
-  let user = useSelector((state) => state.isAuthenticated);
+  let token = useSelector((state) => state.token);
 
   const getCurrentUser = () => {
     let data = getData();
@@ -23,12 +23,17 @@ function App() {
     }
   };
 
+  const logoutUser = () => {
+    localStorage.removeItem("token");
+    dispatch({ type: "LOGOUT", payload: "" });
+  };
+
   useEffect(() => {
     getCurrentUser();
   }, []);
 
   const ProtectedRoute = (props) => {
-    if (user === true) {
+    if (token) {
       return <Route {...props} />;
     } else {
       return <Redirect to="/login" />;
@@ -57,10 +62,8 @@ function App() {
             <Nav.Link to="/register" as={NavLink}>
               Register
             </Nav.Link>
-            {user ? (
-              <Nav.Link to="/logout" as={NavLink}>
-                Logout
-              </Nav.Link>
+            {token ? (
+              <Nav.Link onClick={() => logoutUser()}>Logout</Nav.Link>
             ) : (
               ""
             )}
@@ -70,11 +73,11 @@ function App() {
       <Switch>
         <Route exact path="/" component={Home}></Route>
         <Route exact path="/login" component={Login}></Route>
-        <Route exact path="/logout" component={Logout}></Route>
         <Route exact path="/register" component={Register}></Route>
+        <Route exact path="/update" component={Update}></Route>
         <ProtectedRoute
           path="/profile"
-          render={(props) => <Profile {...props} user={user} />}
+          render={(props) => <Profile {...props} />}
         />
       </Switch>
     </div>
