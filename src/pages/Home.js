@@ -1,24 +1,40 @@
 import React, { useState } from "react";
 import { Jumbotron, Container, Form, Col, Button } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import Flatpickr from "react-flatpickr";
 import verify from "../ultils/verify";
 import "flatpickr/dist/themes/airbnb.css";
 
+const API = process.env.REACT_APP_BACKEND;
+
 export default function Home() {
+  const token = useSelector((state) => state.token);
   const [date, setDate] = useState("");
   const [address, setAddress] = useState("");
   const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("AL");
   const [zipCode, setZip] = useState("");
-  const encode = (x) => {
-    return encodeURIComponent(x);
+  const sendForm = async (formData) => {
+    try {
+      let url = API + "/meeting/new";
+      const data = await fetch(url, {
+        method: "POST",
+        headers: {
+          "x-access-token": token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const response = await data.json();
+      alert("Create new meeting successfully!");
+    } catch (error) {
+      alert("Some errors happened. Please contact support.");
+    }
   };
   const submitForm = async (e) => {
     e.preventDefault();
     let message = "";
-    const formData = { date, address, address2, city, state, zipCode };
-    console.log(formData);
     if (!date || !address || !city || !state || !zipCode) {
       message += "Missing fields!";
       alert(message);
@@ -29,6 +45,14 @@ export default function Home() {
       alert("Address is invalid!");
       return;
     }
+    let location;
+    if (!address2) {
+      location = `${address.trim()}, ${city.trim()} ${state.trim()}, ${zipCode.trim()}`;
+    } else {
+      location = `${address.trim()} ${address2.trim()}, ${city.trim()} ${state.trim()}, ${zipCode.trim()}`;
+    }
+    const formData = { location, dateAndTime: date };
+    sendForm(formData);
   };
   return (
     <div>

@@ -16,21 +16,22 @@ export default function Update() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const sendForm = async (formData) => {
-    let url = API + "/users/update";
-    const newUser = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "x-access-token": token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    if (newUser.ok) {
+    try {
+      let url = API + "/users/update";
+      const data = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "x-access-token": token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const result = await data.json();
       alert("Update account successfully!");
-    } else {
+      history.push("/profile");
+    } catch (error) {
       alert("Some errors happened. Please contact support.");
     }
-    history.push("/profile");
   };
   const submitForm = (e) => {
     let errors = {

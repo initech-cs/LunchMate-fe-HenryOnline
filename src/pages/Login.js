@@ -12,22 +12,21 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const sendForm = async (formData) => {
-    let url = API + "/auth/login";
-    const data = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    if (data.ok) {
-      alert("User login successfully.");
-      let result = await data.json();
-      console.log(result.data);
+    try {
+      let url = API + "/auth/login";
+      const data = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const result = await data.json();
       localStorage.setItem("token", JSON.stringify(result.data.token));
       dispatch({ type: "LOGIN", payload: result.data.token });
+      alert("Login successfully");
       history.push("/profile");
-    } else {
+    } catch (error) {
       alert("Some errors happened. Please contact support.");
     }
   };

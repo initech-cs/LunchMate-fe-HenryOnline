@@ -12,17 +12,18 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const sendForm = async (formData) => {
-    let url = API + "/auth/register";
-    const newUser = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    if (newUser.ok) {
+    try {
+      let url = API + "/auth/register";
+      const data = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const result = await data.json();
       alert("Account created successfully!");
-    } else {
+    } catch (error) {
       alert("Some errors happened. Please contact support.");
     }
   };
